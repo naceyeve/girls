@@ -41,7 +41,7 @@ public class PictureLoader {
             try {
                 URL url = new URL(mImgUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("get");
+                conn.setRequestMethod("GET");
                 //set the outtime
                 conn.setConnectTimeout(10000);
                 if (conn.getResponseCode() == 200) {

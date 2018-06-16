@@ -8,7 +8,7 @@ import android.widget.ImageView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private ImageView mImageView;
     private Button mButton;
@@ -21,9 +21,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mLoader = new PictureLoader();
-        initView();
-        
         initData();
+        initView();
+
     }
 
     private void initData() {
@@ -43,18 +43,26 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         mImageView = findViewById(R.id.imageView);
         mButton = findViewById(R.id.button);
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(index > 9){
-                    index = 0;
-                }
-                mLoader.load(mImageView,mUrls.get(index));
-                index++;
-            }
-        });
+        mButton.setOnClickListener(this);
+
+        loadPicture();
+    }
+
+    private void loadPicture() {
+        mLoader.load(mImageView,mUrls.get(index));
     }
 
 
-
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.button:
+                if(index > 9){
+                    index = 0;
+                }
+                loadPicture();
+                index++;
+                break;
+        }
+    }
 }
