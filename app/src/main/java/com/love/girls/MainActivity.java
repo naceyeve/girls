@@ -1,5 +1,6 @@
 package com.love.girls;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,54 +16,79 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ArrayList<String> mUrls;
     private PictureLoader mLoader;
     private int index = 0;
+    private int page = 1;
+    private Button mBt_fresh;
+    private SisterApi mApi;
+    private ArrayList<Sister> mSisters ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mLoader = new PictureLoader();
+        mApi = new SisterApi();
         initData();
         initView();
 
     }
 
     private void initData() {
-        mUrls = new ArrayList<>();
-        mUrls.add("http://ww4.sinaimg.cn/large/610dc034jw1f6ipaai7wgj20dw0kugp4.jpg");
-        mUrls.add("http://ww3.sinaimg.cn/large/610dc034jw1f6gcxc1t7vj20hs0hsgo1.jpg");
-        mUrls.add("http://ww4.sinaimg.cn/large/610dc034jw1f6f5ktcyk0j20u011hacg.jpg");
-        mUrls.add("http://ww1.sinaimg.cn/large/610dc034jw1f6e1f1qmg3j20u00u0djp.jpg");
-        mUrls.add("http://ww3.sinaimg.cn/large/610dc034jw1f6aipo68yvj20qo0qoaee.jpg");
-        mUrls.add("http://ww3.sinaimg.cn/large/610dc034jw1f69c9e22xjj20u011hjuu.jpg");
-        mUrls.add("http://ww3.sinaimg.cn/large/610dc034jw1f689lmaf7qj20u00u00v7.jpg");
-        mUrls.add("http://ww3.sinaimg.cn/large/c85e4a5cjw1f671i8gt1rj20vy0vydsz.jpg");
-        mUrls.add("http://ww2.sinaimg.cn/large/610dc034jw1f65f0oqodoj20qo0hntc9.jpg");
-        mUrls.add("http://ww2.sinaimg.cn/large/c85e4a5cgw1f62hzfvzwwj20hs0qogpo.jpg");
+        mSisters = new ArrayList<>();
+        new sisterAsycTask(page).execute();
+
+
     }
 
     private void initView() {
         mImageView = findViewById(R.id.imageView);
-        mButton = findViewById(R.id.button);
+        mButton = findViewById(R.id.bt_next);
+        mBt_fresh = findViewById(R.id.bt_fresh);
         mButton.setOnClickListener(this);
+        mBt_fresh.setOnClickListener(this);
 
-        loadPicture();
     }
 
-    private void loadPicture() {
-        mLoader.load(mImageView,mUrls.get(index));
-    }
 
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
-            case R.id.button:
-                if(index > 9){
-                    index = 0;
+            case R.id.bt_next:
+                if(mSisters != null && !mSisters.isEmpty()){
+
+                    if(index > 9){
+                        index = 0;
+                    }
+                    mLoader.load(mImageView,mSisters.get(index).getUrl());
+                    index++;
                 }
-                loadPicture();
-                index++;
+                break;
+            case R.id.bt_fresh:
+                page++;
+                new sisterAsycTask(page).execute();
+                index = 0;
                 break;
         }
     }
+
+   public class sisterAsycTask extends AsyncTask<Void,Void,ArrayList<Sister>>{
+        int page  = 0;
+
+        public sisterAsycTask(int page){
+            this.page = page;
+        }
+
+       @Override
+       protected ArrayList<Sister> doInBackground(Void... voids) {
+           ArrayList<Sister> sisters = mApi.fetchSister(10, page);
+           return sisters;
+       }
+
+       @Override
+       protected void onPostExecute(ArrayList<Sister> sisters) {
+           super.onPostExecute(sisters);
+            mSisters.clear();
+            mSisters.addAll(sisters);
+       }
+   }
 }
